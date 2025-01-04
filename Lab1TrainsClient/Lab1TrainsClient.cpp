@@ -1,10 +1,15 @@
-﻿#include <WinSock2.h>
-#include <WS2tcpip.h>
-#include <iostream>
-#include <string>
-#include <regex>
+﻿//This project files includes
 #include "resource.h"
-#include<thread>
+
+//WinAPI includes
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+
+//C++ standart includes
+#include <iostream>
+#include <regex>
+#include <string>
+#include <thread>
 
 int ec{ 0 }; //error code
 

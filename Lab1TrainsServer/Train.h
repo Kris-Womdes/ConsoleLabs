@@ -1,11 +1,12 @@
 #pragma once
 
+//C++ standart includes
 #include <string>
-
-using std::string;
 
 namespace deliverCorp
 {
+	using std::string;
+
 	class Train
 	{
 	public:

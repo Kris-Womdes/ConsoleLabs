@@ -1,4 +1,7 @@
+//This project files includes
 #include "Train.h"
+
+//C++ standart includes
 #include <iostream>
 
 namespace deliverCorp
@@ -16,9 +19,7 @@ namespace deliverCorp
 		cout << "Destination: "; cin >> destination;
 		cout << "Number: "; cin >> num;
 		cout << "Departure time: "; cin >> departure_time;
-		cout << "A-Seats available: "; cin >> seats_available;
-		cout << "B-Seats available: "; cin >> seats_available_type_B;
-		cout << "C-Seats available: "; cin >> seats_available_type_C;
+		cout << "Seats available: "; cin >> seats_available;
 	}
 
 	void get_trains(Train const* const pTrainArray, unsigned const trainsNum, TrainsFilter const& const tf)
