@@ -18,12 +18,21 @@
     <ClCompile Include="Lab2StackClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Stack.cpp">
+    <ClCompile Include="ConsoleDawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\cpp\ErrorInfoShowman.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Stack.h">
+    <ClInclude Include="BookStack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleDrawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\h\ErrorInfoShowman.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
