@@ -4,3 +4,9 @@
 #include <cstdint>
 
 void initialize(uint16_t spaceWidth = 160, uint16_t spaceHeight = 40);
+
+bool drawPixel();
+
+void swapBuffers();
+
+void uninitialize();
