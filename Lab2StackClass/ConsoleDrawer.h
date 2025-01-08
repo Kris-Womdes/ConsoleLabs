@@ -1,12 +1,25 @@
 #pragma once
 
+//WinAPI includes:
+#include <Windows.h>
+
 //C++ standart includes:
 #include <cstdint>
 
-void initialize(uint16_t spaceWidth = 160, uint16_t spaceHeight = 40);
+namespace console_drawer
+{
+	extern COORD bufferSize;
+	extern int32_t pixelAmountTotal;
 
-bool drawPixel();
+	void Initialize(SHORT argFontSize = 12, COORD argBufferSize = { 120, 50 });
 
-void swapBuffers();
+	bool DrawPixel(WORD color, COORD coord);
 
-void uninitialize();
+	bool DrawImage(HANDLE hImage, COORD originalSize, COORD positionOfLeftUpperCorner, COORD desiredSize);
+
+	bool DrawImage(HANDLE hImage, COORD originalSize, COORD positionOfLeftUpperCorner);
+
+	void Present(bool cleanAfterPresenting = true);
+
+	void Uninitialize();
+}

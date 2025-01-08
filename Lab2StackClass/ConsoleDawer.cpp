@@ -6,70 +6,111 @@
 //C++ standart includes:
 #include <cstdint>
 
-HANDLE hBufferInputDefault, hBufferOutputDefault,
-hBufferOutputCustom_1, hBufferOutputCustom_2;
-COORD bufferSize;
-bool indexBuffer{ 0 };
-
-HWND hwnd;
-
-void initialize(uint16_t spaceWidth, uint16_t spaceHeight)
+namespace console_drawer
 {
-	//если всё, что делает /subsystem:console -- это создаёт буферы по умолчанию, то переключить на другое (но а если он еще и в ответе за окно и ещё что-нибудь?)
+	HANDLE hBufferOutputCustom;
+	SHORT fontSize;
+	COORD bufferSize{ 0,0 };
+	int32_t pixelAmountTotal{ 0 };
+	WORD* pAttributes;
 
-	hBufferInputDefault = GetStdHandle(STD_INPUT_HANDLE);
-	DWORD mode;
-	GetConsoleMode(hBufferInputDefault, &mode);
-	mode &= ~ENABLE_LINE_INPUT & ~ENABLE_ECHO_INPUT & ~ENABLE_PROCESSED_INPUT & ~ENABLE_QUICK_EDIT_MODE & ~ENABLE_INSERT_MODE;
-	SetConsoleMode(hBufferInputDefault, mode);
+	HWND hwnd;
 
-	bufferSize.X = spaceWidth;
-	bufferSize.Y = spaceHeight;
+	void DisableCursorOfBuffer(HANDLE hBuffer)
+	{
+		static CONSOLE_CURSOR_INFO cursorInfo;
+		GetConsoleCursorInfo(hBuffer, &cursorInfo);
+		cursorInfo.bVisible = FALSE;
+		SetConsoleCursorInfo(hBuffer, &cursorInfo);
+	}
 
-	hBufferOutputDefault = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleScreenBufferSize(hBufferOutputDefault, bufferSize);
+	void Initialize(SHORT argFontSize, COORD argBufferSize)
+	{
+		bufferSize = argBufferSize;
 
-	hBufferOutputCustom_1 = CreateConsoleScreenBuffer(GENERIC_WRITE, 0, 0, CONSOLE_TEXTMODE_BUFFER, 0);
-	SetConsoleScreenBufferSize(hBufferOutputCustom_1, bufferSize);
-	hBufferOutputCustom_2 = CreateConsoleScreenBuffer(GENERIC_WRITE, 0, 0, CONSOLE_TEXTMODE_BUFFER, 0);
-	SetConsoleScreenBufferSize(hBufferOutputCustom_2, bufferSize);
+		hBufferOutputCustom = CreateConsoleScreenBuffer(GENERIC_WRITE, 0, 0, CONSOLE_TEXTMODE_BUFFER, 0);
+		SetConsoleScreenBufferSize(hBufferOutputCustom, bufferSize);
 
-	SetConsoleActiveScreenBuffer(hBufferOutputCustom_1);
+		SetConsoleActiveScreenBuffer(hBufferOutputCustom);
 
+		SetConsoleOutputCP(CP_UTF8);
 
-	hwnd = GetConsoleWindow();
-	LONG style = GetWindowLongA(hwnd, GWL_STYLE);
-	style &= ~WS_CAPTION & ~WS_THICKFRAME;
-	SetWindowLongA(hwnd, GWL_STYLE, style);
+		CloseHandle(GetStdHandle(STD_INPUT_HANDLE));
 
-	SMALL_RECT windowSize;
-	windowSize.Left = 0;
-	windowSize.Right = spaceWidth - 1;
-	windowSize.Top = 0;
-	windowSize.Bottom = spaceHeight - 1;
-	SetConsoleWindowInfo(hBufferOutputDefault, TRUE, &windowSize);
+		CloseHandle(GetStdHandle(STD_OUTPUT_HANDLE));
 
+		CloseHandle(GetStdHandle(STD_ERROR_HANDLE));
 
 
-	CONSOLE_CURSOR_INFO cursorInfo;
-	GetConsoleCursorInfo(hBufferOutputDefault, &cursorInfo);
-	cursorInfo.bVisible = FALSE;
-	SetConsoleCursorInfo(hBufferOutputDefault, &cursorInfo);
-}
 
-void uninitialize()
-{
-	CloseHandle(hBufferOutputCustom_1);
-	CloseHandle(hBufferOutputCustom_2);
-}
+		hwnd = GetConsoleWindow();
+		LONG style = GetWindowLongA(hwnd, GWL_STYLE);
+		style &= ~WS_CAPTION & ~WS_THICKFRAME;
+		SetWindowLongA(hwnd, GWL_STYLE, style);
 
-bool drawPixel()
-{
-	return true;
-}
+		SMALL_RECT windowSize;
+		windowSize.Left = 0;
+		windowSize.Right = bufferSize.X - 1;
+		windowSize.Top = 0;
+		windowSize.Bottom = bufferSize.Y - 1;
+		SetConsoleWindowInfo(hBufferOutputCustom, TRUE, &windowSize);
 
-void swapBuffers()
-{
-	SetConsoleActiveScreenBuffer(indexBuffer ? hBufferOutputCustom_1 : hBufferOutputCustom_2);
-	indexBuffer = !indexBuffer;
+
+
+		fontSize = argFontSize;
+		CONSOLE_FONT_INFOEX fontInfo;
+		fontInfo.cbSize = sizeof(fontInfo);
+		fontInfo.nFont = 0;
+		fontInfo.dwFontSize.Y = fontInfo.dwFontSize.X = fontSize;
+		fontInfo.FontFamily = FF_DONTCARE;
+		fontInfo.FontWeight = FW_NORMAL;
+		wcscpy_s(fontInfo.FaceName, L"Lucida Console");
+		SetCurrentConsoleFontEx(hBufferOutputCustom, FALSE, &fontInfo);
+
+		DisableCursorOfBuffer(hBufferOutputCustom);
+
+		pixelAmountTotal = bufferSize.X * bufferSize.Y;
+		pAttributes = new WORD[pixelAmountTotal]{};
+	}
+
+	bool DrawPixel(WORD color, COORD coord)
+	{
+		if (coord.X >= 0 && coord.Y >= 0 && coord.X < bufferSize.X && coord.Y < bufferSize.Y)
+		{
+			pAttributes[bufferSize.X * coord.Y + coord.X] = color;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool DrawImage(HANDLE hImage, COORD originalSize, COORD positionOfLeftUpperCorner, COORD desiredSize)
+	{
+		return true;
+	}
+
+	bool DrawImage(HANDLE hImage, COORD originalSize, COORD positionOfLeftUpperCorner)
+	{
+		return DrawImage(hImage, originalSize, positionOfLeftUpperCorner, originalSize);
+	}
+
+	void Present(bool cleanAfterPresenting)
+	{
+		DWORD attrWrittenAmount;
+		WriteConsoleOutputAttribute(hBufferOutputCustom, pAttributes, pixelAmountTotal, { 0, 0 }, &attrWrittenAmount);
+		if (cleanAfterPresenting)
+		{
+			for (WORD* pAttribute{ pAttributes }; pAttribute < pAttributes + pixelAmountTotal - 1; ++pAttribute)
+			{
+				*pAttribute = 0;
+			}
+		}
+	}
+
+	void Uninitialize()
+	{
+		CloseHandle(hBufferOutputCustom);
+	}
 }

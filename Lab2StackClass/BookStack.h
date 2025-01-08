@@ -11,10 +11,10 @@ class BookStack
 {
 	typedef unsigned char MAX_BLOCK_AMOUNT_TYPE;
 	ELEMENT_TYPE** ppElement;
-	MAX_BLOCK_AMOUNT_TYPE indexOfCurrentBlock;
+	MAX_BLOCK_AMOUNT_TYPE indexTopBlock;
 
 	typedef unsigned char MAX_ELEMENT_AMOUNT_PER_BLOCK_TYPE;
-	MAX_ELEMENT_AMOUNT_PER_BLOCK_TYPE indexOfFutureElementInCurrentBlock;
+	MAX_ELEMENT_AMOUNT_PER_BLOCK_TYPE indexFutureTopElement_InCurrentBlock;
 
 	//must have the size of sizeof(MAX_BLOCK_AMOUNT_TYPE + MAX_ELEMENT_AMOUNT_PER_BLOCK_TYPE)
 	typedef int16_t MAX_ELEMENT_TOTAL_AMOUNT_TYPE;
@@ -25,26 +25,26 @@ public:
 	BookStack()
 	{
 		ppElement = new ELEMENT_TYPE * [MAX_BLOCK_AMOUNT];
-		indexOfCurrentBlock = 0;
+		indexTopBlock = 0;
 
-		ppElement[indexOfCurrentBlock] = new ELEMENT_TYPE[MAX_ELEMENT_AMOUNT_PER_BLOCK];
-		indexOfFutureElementInCurrentBlock = 0;
+		ppElement[indexTopBlock] = new ELEMENT_TYPE[MAX_ELEMENT_AMOUNT_PER_BLOCK];
+		indexFutureTopElement_InCurrentBlock = 0;
 	}
 
 	void push(const ELEMENT_TYPE& const element)
 	{
-		ppElement[indexOfCurrentBlock][indexOfFutureElementInCurrentBlock] = element;
-		if (indexOfFutureElementInCurrentBlock < MAX_ELEMENT_AMOUNT_PER_BLOCK - 1)
+		ppElement[indexTopBlock][indexFutureTopElement_InCurrentBlock] = element;
+		if (indexFutureTopElement_InCurrentBlock < MAX_ELEMENT_AMOUNT_PER_BLOCK - 1)
 		{
-			indexOfFutureElementInCurrentBlock++;
+			indexFutureTopElement_InCurrentBlock++;
 		}
 		else
 		{
-			if (indexOfCurrentBlock < MAX_BLOCK_AMOUNT - 1)
+			if (indexTopBlock < MAX_BLOCK_AMOUNT - 1)
 			{
-				indexOfCurrentBlock++;
-				ppElement[indexOfCurrentBlock] = new ELEMENT_TYPE[MAX_ELEMENT_AMOUNT_PER_BLOCK];
-				indexOfFutureElementInCurrentBlock = 0;
+				indexTopBlock++;
+				ppElement[indexTopBlock] = new ELEMENT_TYPE[MAX_ELEMENT_AMOUNT_PER_BLOCK];
+				indexFutureTopElement_InCurrentBlock = 0;
 			}
 			else
 			{
@@ -55,24 +55,24 @@ public:
 
 	ELEMENT_TYPE& pop()
 	{
-		if (indexOfFutureElementInCurrentBlock > 0)
+		if (indexFutureTopElement_InCurrentBlock>0)
 		{
-			indexOfFutureElementInCurrentBlock--;
-			return ppElement[indexOfCurrentBlock][indexOfFutureElementInCurrentBlock];
+			indexFutureTopElement_InCurrentBlock--;
 		}
 		else
 		{
-			if (indexOfCurrentBlock > 0)
+			if (indexTopBlock > 0)
 			{
-				delete[] ppElement[indexOfCurrentBlock];
-				indexOfCurrentBlock--;
-				indexOfFutureElementInCurrentBlock = MAX_ELEMENT_AMOUNT_PER_BLOCK - 1;
+				delete[] ppElement[indexTopBlock];
+				indexTopBlock--;
+				indexFutureTopElement_InCurrentBlock = MAX_ELEMENT_AMOUNT_PER_BLOCK - 1;
 			}
 			else
 			{
 				throw std::out_of_range("Failed to pop the element from the stack: There are no elements left");
 			}
 		}
+		return ppElement[indexTopBlock][indexFutureTopElement_InCurrentBlock];
 	}
 
 	BookStack& operator<<(const ELEMENT_TYPE& const element)
@@ -89,7 +89,7 @@ public:
 
 	MAX_ELEMENT_TOTAL_AMOUNT_TYPE getTotalAmountOfElements()
 	{
-		return indexOfCurrentBlock * MAX_ELEMENT_AMOUNT_PER_BLOCK + indexOfFutureElementInCurrentBlock;
+		return indexTopBlock * MAX_ELEMENT_AMOUNT_PER_BLOCK + indexFutureTopElement_InCurrentBlock;
 	}
 
 	void sieve()
@@ -115,11 +115,11 @@ public:
 		//last block not full may be for(){}
 			
 			
-		/*for (MAX_ELEMENT_TOTAL_AMOUNT_TYPE elementCounter{ getTotalAmountOfElements() % 2 == 0 ? 1 : 0 }; elementCounter < indexOfFutureElementInCurrentBlock; ++elementCounter)
+		/*for (MAX_ELEMENT_TOTAL_AMOUNT_TYPE elementCounter{ getTotalAmountOfElements() % 2 == 0 ? 1 : 0 }; elementCounter < indexFutureTopElement_InCurrentBlock; ++elementCounter)
 		{
 			pop();
 		}
-		for (MAX_BLOCK_AMOUNT_TYPE blockCounter{ 1 }; blockCounter < (indexOfCurrentBlock + 1) / 2.; ++blockCounter)
+		for (MAX_BLOCK_AMOUNT_TYPE blockCounter{ 1 }; blockCounter < (indexTopBlock + 1) / 2.; ++blockCounter)
 		{
 			for (MAX_ELEMENT_TOTAL_AMOUNT_TYPE elementCounter{ getTotalAmountOfElements() % 2 == 0 ? 1 : 0 }; elementCounter < MAX_ELEMENT_AMOUNT_PER_BLOCK; ++elementCounter)
 			{
@@ -130,7 +130,7 @@ public:
 
 	~BookStack()
 	{
-		for (unsigned char blockCounter{ 0 }; blockCounter < indexOfCurrentBlock + 1; ++blockCounter)
+		for (unsigned char blockCounter{ 0 }; blockCounter < indexTopBlock + 1; ++blockCounter)
 		{
 			delete[] ppElement[blockCounter];
 		}
