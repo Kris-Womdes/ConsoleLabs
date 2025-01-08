@@ -16,6 +16,16 @@ namespace console_drawer
 
 	HWND hwnd;
 
+	ConsoleImage::ConsoleImage(WORD resourceID_JPEG)
+	{
+
+	}
+
+	ConsoleImage::~ConsoleImage()
+	{
+		delete[] this->pAttributes;
+	}
+
 	void DisableCursorOfBuffer(HANDLE hBuffer)
 	{
 		static CONSOLE_CURSOR_INFO cursorInfo;
@@ -86,14 +96,14 @@ namespace console_drawer
 		}
 	}
 
-	bool DrawImage(HANDLE hImage, COORD originalSize, COORD positionOfLeftUpperCorner, COORD desiredSize)
+	bool DrawImage(ConsoleImage& consoleImage, COORD originalSize, COORD positionOfLeftUpperCorner, COORD desiredSize)
 	{
 		return true;
 	}
 
-	bool DrawImage(HANDLE hImage, COORD originalSize, COORD positionOfLeftUpperCorner)
+	bool DrawImage(ConsoleImage& consoleImage, COORD originalSize, COORD positionOfLeftUpperCorner)
 	{
-		return DrawImage(hImage, originalSize, positionOfLeftUpperCorner, originalSize);
+		return DrawImage(consoleImage, originalSize, positionOfLeftUpperCorner, originalSize);
 	}
 
 	void Present(bool cleanAfterPresenting)

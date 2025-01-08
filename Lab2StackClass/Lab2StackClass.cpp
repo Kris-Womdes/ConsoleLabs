@@ -24,7 +24,13 @@ int main()
 	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 
 	console_drawer::Initialize();
-	console_drawer::DrawImage(0, { console_drawer::bufferSize.X, console_drawer::bufferSize.Y }, { 0,0 });
+
+	//
+	//класс консольное изображение, с конструтором, аргумент которого -- jpeg
+	//консольное изображение проще вывести
+	console_drawer::ConsoleImage image(IDR_JPEG1);
+	//size из объекат взять
+	console_drawer::DrawImage(image, { console_drawer::bufferSize.X, console_drawer::bufferSize.Y }, { 0,0 });
 	console_drawer::Present();
 
 	//возможность двигать окно пропала
